@@ -10,5 +10,5 @@ public class RegisterDTO
 
     [Required]
     [MinLength(6)]
-    public string Senha { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }

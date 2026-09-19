@@ -25,18 +25,18 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public IActionResult Register([FromBody] RegisterDTO request)
     {
-        var emailExiste = _context.Usuarios.Any(u => u.Email == request.Email);
+        var emailExists = _context.Users.Any(u => u.Email == request.Email);
         
-        if (emailExiste)
+        if (emailExists)
             return BadRequest(new { mensagem = "Este e-mail já está em uso." });
 
-        var novoUsuario = new Usuario
+        var newUser = new User
         {
             Email = request.Email,
-            Senha = BCrypt.Net.BCrypt.HashPassword(request.Senha)
+            Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
         };
 
-        _context.Usuarios.Add(novoUsuario);
+        _context.Users.Add(newUser);
         _context.SaveChanges();
 
         return Created("", new { mensagem = "Usuário registrado com sucesso!" });
@@ -45,14 +45,14 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] LoginDTO request)
     {
-        var usuario = _context.Usuarios.FirstOrDefault(u => u.Email == request.Email);
+        var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
 
-        if (usuario == null)
+        if (user == null)
             return Unauthorized(new { mensagem = "E-mail ou senha inválidos." });
 
-        bool senhaValida = BCrypt.Net.BCrypt.Verify(request.Senha, usuario.Senha);
+        bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
 
-        if (!senhaValida)
+        if (!isPasswordValid)
             return Unauthorized(new { mensagem = "E-mail ou senha inválidos." });
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -62,8 +62,8 @@ public class AuthController : ControllerBase
         {
             Subject = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.NameIdentifier, usuario.IdUsuario.ToString()),
-                new Claim(ClaimTypes.Email, usuario.Email)
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Email, user.Email)
             }),
             Expires = DateTime.UtcNow.AddHours(2),
             Issuer = _configuration["Jwt:Issuer"],

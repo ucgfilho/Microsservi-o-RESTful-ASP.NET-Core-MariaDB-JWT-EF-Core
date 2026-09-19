@@ -4,36 +4,36 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace projetoAPI.Models;
 
 [Table("produtos")]
-public class Produto
+public class Product
 {
     [Key]
     [Column("id_produto")]
-    public int IdProduto { get; set; }
+    public int Id { get; set; }
 
     [Required]
     [MaxLength(150)]
     [Column("nome")]
-    public string Nome { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
     [MaxLength(255)]
     [Column("descricao")]
-    public string? Descricao { get; set; }
+    public string? Description { get; set; }
 
     [Column("categoria_id")]
-    public int? CategoriaId { get; set; }
+    public int? CategoryId { get; set; }
 
     [Column("preco")]
-    public decimal Preco { get; set; }
+    public decimal Price { get; set; }
 
     [Column("estoque")]
-    public int Estoque { get; set; }
+    public int Stock { get; set; }
 
     [Column("ativo")]
-    public bool Ativo { get; set; } = true;
+    public bool IsActive { get; set; } = true;
 
     [Column("criado_em")]
-    public DateTime CriadoEm { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     [Column("atualizado_em")]
-    public DateTime AtualizadoEm { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

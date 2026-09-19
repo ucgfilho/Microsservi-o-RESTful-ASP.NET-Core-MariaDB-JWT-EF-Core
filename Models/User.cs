@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace projetoAPI.Models;
 
 [Table("usuarios")]
-public class Usuario
+public class User
 {
     [Key]
     [Column("id_usuario")]
-    public int IdUsuario { get; set; }
+    public int Id { get; set; }
 
     [Required]
     [EmailAddress]
@@ -19,5 +19,5 @@ public class Usuario
     [Required]
     [MaxLength(255)]
     [Column("senha")]
-    public string Senha { get; set; } = string.Empty;
+    public string Password { get; set; } = string.Empty;
 }
