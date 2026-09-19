@@ -23,7 +23,7 @@ O projeto aplica boas práticas de desenvolvimento back-end, utilizando Entity F
 2. **Pré-requisitos:**
    - [.NET 10 SDK](https://dotnet.microsoft.com/)
    - [MariaDB](https://mariadb.org/)
-   - Ferramenta EF Core CLI:
+   - EF Core:
      ```bash
      dotnet tool install --global dotnet-ef
      ```
