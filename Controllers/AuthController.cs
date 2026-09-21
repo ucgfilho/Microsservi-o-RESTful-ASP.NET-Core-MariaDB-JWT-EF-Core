@@ -1,11 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using projetoAPI.Data;
 using projetoAPI.DTOs;
-using projetoAPI.Models;
+using projetoAPI.Services.Interfaces;
 
 namespace projetoAPI.Controllers;
 
@@ -13,67 +8,32 @@ namespace projetoAPI.Controllers;
 [Route("api/[controller]")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext context, IConfiguration configuration)
+    public AuthController(IAuthService authService)
     {
-        _context = context;
-        _configuration = configuration;
+        _authService = authService;
     }
 
     [HttpPost("register")]
-    public IActionResult Register([FromBody] RegisterDTO request)
+    public async Task<IActionResult> Register([FromBody] RegisterDTO request)
     {
-        var emailExists = _context.Users.Any(u => u.Email == request.Email);
-        
-        if (emailExists)
-            return BadRequest(new { mensagem = "Este e-mail já está em uso." });
+        var result = await _authService.RegisterAsync(request);
 
-        var newUser = new User
-        {
-            Email = request.Email,
-            Password = BCrypt.Net.BCrypt.HashPassword(request.Password)
-        };
-
-        _context.Users.Add(newUser);
-        _context.SaveChanges();
+        if (!result.Success)
+            return BadRequest(new { mensagem = result.ErrorMessage });
 
         return Created("", new { mensagem = "Usuário registrado com sucesso!" });
     }
 
     [HttpPost("login")]
-    public IActionResult Login([FromBody] LoginDTO request)
+    public async Task<IActionResult> Login([FromBody] LoginDTO request)
     {
-        var user = _context.Users.FirstOrDefault(u => u.Email == request.Email);
+        var result = await _authService.LoginAsync(request);
 
-        if (user == null)
-            return Unauthorized(new { mensagem = "E-mail ou senha inválidos." });
+        if (!result.Success)
+            return Unauthorized(new { mensagem = result.ErrorMessage });
 
-        bool isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.Password);
-
-        if (!isPasswordValid)
-            return Unauthorized(new { mensagem = "E-mail ou senha inválidos." });
-
-        var tokenHandler = new JwtSecurityTokenHandler();
-        var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"]!);
-        
-        var tokenDescriptor = new SecurityTokenDescriptor
-        {
-            Subject = new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new Claim(ClaimTypes.Email, user.Email)
-            }),
-            Expires = DateTime.UtcNow.AddHours(2),
-            Issuer = _configuration["Jwt:Issuer"],
-            Audience = _configuration["Jwt:Audience"],
-            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-        };
-
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        var tokenString = tokenHandler.WriteToken(token);
-
-        return Ok(new { token = tokenString });
+        return Ok(new { token = result.Token });
     }
 }

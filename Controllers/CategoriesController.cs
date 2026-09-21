@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using projetoAPI.Data;
 using projetoAPI.Models;
+using projetoAPI.Services.Interfaces;
 
 namespace projetoAPI.Controllers;
 
@@ -10,82 +10,62 @@ namespace projetoAPI.Controllers;
 [Authorize]
 public class CategoriesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ICategoryService _categoryService;
 
-    public CategoriesController(AppDbContext context)
+    public CategoriesController(ICategoryService categoryService)
     {
-        _context = context;
+        _categoryService = categoryService;
     }
 
     [HttpGet]
-    public IActionResult GetCategories()
+    public async Task<IActionResult> GetCategories()
     {
-        return Ok(_context.Categories.ToList());
+        return Ok(await _categoryService.GetAllAsync());
     }
 
     [HttpGet("{id}")]
-    public IActionResult GetCategoryById(int id)
+    public async Task<IActionResult> GetCategoryById(int id)
     {
-        var existingCategory = _context.Categories.Find(id);
-
-        if (existingCategory == null)
+        var category = await _categoryService.GetByIdAsync(id);
+        if (category == null)
             return NotFound();
 
-        return Ok(existingCategory);
+        return Ok(category);
     }
 
     [HttpPost]
-    public IActionResult PostCategory([FromBody] Category newCategory)
+    public async Task<IActionResult> PostCategory([FromBody] Category newCategory)
     {
-        _context.Categories.Add(newCategory);
-        _context.SaveChanges();
-
-        return Created("", newCategory);
+        var category = await _categoryService.CreateAsync(newCategory);
+        return Created("", category);
     }
 
     [HttpPut("{id}")]
-    public IActionResult PutCategory(int id, [FromBody] Category updatedCategory)
+    public async Task<IActionResult> PutCategory(int id, [FromBody] Category updatedCategory)
     {
-        var existingCategory = _context.Categories.Find(id);
-        
-        if (existingCategory == null)
+        var category = await _categoryService.UpdateAsync(id, updatedCategory);
+        if (category == null)
             return NotFound();
 
-        existingCategory.Name = updatedCategory.Name;
-        existingCategory.Description = updatedCategory.Description;
-
-        _context.SaveChanges();
-        return Ok(existingCategory);
+        return Ok(category);
     }
 
     [HttpPatch("{id}")]
-    public IActionResult PatchCategory(int id, [FromBody] Category updatedCategory)
+    public async Task<IActionResult> PatchCategory(int id, [FromBody] Category updatedCategory)
     {
-        var existingCategory = _context.Categories.Find(id);
-        
-        if (existingCategory == null)
+        var category = await _categoryService.PatchAsync(id, updatedCategory);
+        if (category == null)
             return NotFound();
 
-        if (!string.IsNullOrEmpty(updatedCategory.Name))
-            existingCategory.Name = updatedCategory.Name;
-
-        if (updatedCategory.Description != null)
-            existingCategory.Description = updatedCategory.Description;
-
-        _context.SaveChanges();
-        return Ok(existingCategory);
+        return Ok(category);
     }
 
     [HttpDelete("{id}")]
-    public IActionResult DeleteCategory(int id)
+    public async Task<IActionResult> DeleteCategory(int id)
     {
-        var existingCategory = _context.Categories.Find(id);
-        
-        if (existingCategory == null)
+        var deleted = await _categoryService.DeleteAsync(id);
+        if (!deleted)
             return NotFound();
-
-        _context.Categories.Remove(existingCategory);
-        _context.SaveChanges();
 
         return NoContent();
     }
