@@ -23,6 +23,17 @@ public class ProductsController : ControllerBase
         return Ok(_context.Products.ToList());
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetProductById(int id)
+    {
+        var existingProduct = _context.Products.Find(id);
+
+        if (existingProduct == null)
+            return NotFound();
+
+        return Ok(existingProduct);
+    }
+
     [HttpPost]
     public IActionResult PostProduct([FromBody] Product newProduct)
     {

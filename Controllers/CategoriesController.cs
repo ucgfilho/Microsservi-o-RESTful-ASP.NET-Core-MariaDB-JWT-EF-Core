@@ -23,6 +23,17 @@ public class CategoriesController : ControllerBase
         return Ok(_context.Categories.ToList());
     }
 
+    [HttpGet("{id}")]
+    public IActionResult GetCategoryById(int id)
+    {
+        var existingCategory = _context.Categories.Find(id);
+
+        if (existingCategory == null)
+            return NotFound();
+
+        return Ok(existingCategory);
+    }
+
     [HttpPost]
     public IActionResult PostCategory([FromBody] Category newCategory)
     {
