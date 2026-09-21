@@ -95,7 +95,7 @@ projetoAPI/
 Atualize a string de conexão no arquivo `appsettings.json` com suas credenciais do banco:
 ```json
 "ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Port=3306;Database=produtos_db;Uid=root;Pwd=sua_senha;"
+  "DefaultConnection": "Server=localhost;Port=3306;Database=produtos_db;Uid=seu_user;Pwd=sua_senha;"
 }
 ```
 
