@@ -6,7 +6,7 @@ O projeto conta com persistência assíncrona via Entity Framework Core, separa�
 
 ---
 
-## Arquitetura e Princípios SOLID
+## Arquitetura
 
 A arquitetura do projeto foi estruturada em camadas desacopladas por meio de interfaces e injeção de dependência:
 
