@@ -71,7 +71,7 @@ projetoAPI/
 
 ---
 
-## Stack Tecnológica
+## Stack
 
 * **Runtime & Framework:** C# / .NET 10 (ASP.NET Core Web API)
 * **ORM:** Entity Framework Core 9 (Pomelo)
@@ -81,7 +81,7 @@ projetoAPI/
 
 ---
 
-## Como Rodar Localmente
+## Como Rodar
 
 ### 1. Pré-requisitos
 * [.NET 10 SDK](https://dotnet.microsoft.com/)
