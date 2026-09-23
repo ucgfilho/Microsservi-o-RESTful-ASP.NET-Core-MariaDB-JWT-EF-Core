@@ -10,14 +10,40 @@ using projetoAPI.Services;
 using projetoAPI.Services.Interfaces;
 using Scalar.AspNetCore;
 
+using DotNetEnv;
+
+Env.Load();
+
 var builder = WebApplication.CreateBuilder(args);
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? builder.Configuration["DB_HOST"] ?? "localhost";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? builder.Configuration["DB_PORT"] ?? "3306";
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? builder.Configuration["DB_NAME"] ?? "produtos_db";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? builder.Configuration["DB_USER"] ?? "root";
+var dbPwd = Environment.GetEnvironmentVariable("DB_PASSWORD") ?? builder.Configuration["DB_PASSWORD"] ?? "";
+
+var connectionString = $"Server={dbHost};Port={dbPort};Database={dbName};Uid={dbUser};Pwd={dbPwd};";
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrEmpty(jwtKey))
+{
+    var keyBytes = new byte[64]; // 512 bits
+    using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
+    {
+        rng.GetBytes(keyBytes);
+    }
+    jwtKey = Convert.ToBase64String(keyBytes);
+    Console.WriteLine("⚠️ AVISO: Nenhuma chave JWT foi encontrada nas variáveis de ambiente. Uma chave temporária foi gerada dinamicamente. Os tokens criados serão invalidados caso o servidor seja reiniciado.");
+}
+
+// Garante que a configuração tem a chave (seja ela a do .env ou a gerada agora) para o TokenService
+builder.Configuration["Jwt:Key"] = jwtKey;
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
@@ -31,7 +57,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IPasswordHasher, BcryptPasswordHasher>();
 
-var key = Encoding.ASCII.GetBytes(builder.Configuration["Jwt:Key"]!);
+var key = Encoding.ASCII.GetBytes(jwtKey);
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
