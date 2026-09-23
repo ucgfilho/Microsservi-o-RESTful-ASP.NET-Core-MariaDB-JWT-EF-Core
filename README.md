@@ -24,7 +24,7 @@ A arquitetura do projeto foi estruturada em camadas desacopladas por meio de int
 
 ---
 
-## Estrutura do Projeto
+## Estrutura do projeto
 
 ```
 projetoAPI/
@@ -81,40 +81,25 @@ projetoAPI/
 
 ---
 
-## Como Rodar
+## Como configurar
 
 ### 1. Pré-requisitos
-* [.NET 10 SDK](https://dotnet.microsoft.com/)
-* [MariaDB](https://mariadb.org/) ou [MySQL](https://www.mysql.com/)
-* Ferramenta de linha de comando do EF Core:
-  ```bash
-  dotnet tool install --global dotnet-ef
-  ```
+* [Docker](https://www.docker.com/)
 
-### 2. Configurar a Conexão
-Atualize a string de conexão no arquivo `appsettings.json` com suas credenciais do banco:
-```json
-"ConnectionStrings": {
-  "DefaultConnection": "Server=localhost;Port=3306;Database=produtos_db;Uid=seu_user;Pwd=sua_senha;"
-}
-```
-
-### 3. Aplicar as Migrações
-Execute a atualização do banco de dados para criar as tabelas necessárias:
+### 2. Configurar o Ambiente
+Copie o arquivo de exemplo para criar o seu arquivo de variáveis de ambiente:
 ```bash
-dotnet ef database update
+cp .env.example .env
 ```
+*(Nota: O `.env` centraliza as senhas e as configurações. A chave JWT é gerada dinamicamente pelo sistema na inicialização).*
 
-### 4. Executar o Projeto
-Inicie a aplicação:
+### 3. Executar o Projeto
+Para iniciar a API e o Banco de Dados simultaneamente:
 ```bash
-dotnet run
+docker-compose up -d --build
 ```
-Ou com recarregamento automático durante o desenvolvimento:
-```bash
-dotnet watch
-```
+> **Aviso:** As migrations do Entity Framework Core **são aplicadas automaticamente** assim que a API inicializa. Você não precisa criar as tabelas manualmente. O banco de dados fica acessível na porta `3307` e a API na porta `8080`.
 
-### 5. Acessar a Documentação
-Com a aplicação em execução, acesse no navegador a documentação interativa da API via Scalar:
-* `http://localhost:5096/scalar/v1` (ou na porta HTTPS indicada no terminal)
+### 4. Acessar a Documentação
+Acesse através desse link:
+**http://localhost:8080/scalar/v1**

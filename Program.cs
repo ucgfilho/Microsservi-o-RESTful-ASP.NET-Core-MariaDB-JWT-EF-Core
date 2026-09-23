@@ -33,16 +33,14 @@ builder.Services.AddOpenApi();
 var jwtKey = builder.Configuration["Jwt:Key"];
 if (string.IsNullOrEmpty(jwtKey))
 {
-    var keyBytes = new byte[64]; // 512 bits
+    var keyBytes = new byte[64];
     using (var rng = System.Security.Cryptography.RandomNumberGenerator.Create())
     {
         rng.GetBytes(keyBytes);
     }
     jwtKey = Convert.ToBase64String(keyBytes);
-    Console.WriteLine("⚠️ AVISO: Nenhuma chave JWT foi encontrada nas variáveis de ambiente. Uma chave temporária foi gerada dinamicamente. Os tokens criados serão invalidados caso o servidor seja reiniciado.");
 }
 
-// Garante que a configuração tem a chave (seja ela a do .env ou a gerada agora) para o TokenService
 builder.Configuration["Jwt:Key"] = jwtKey;
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
